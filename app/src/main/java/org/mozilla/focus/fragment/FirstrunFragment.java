@@ -75,6 +75,7 @@ public class FirstrunFragment extends Fragment implements View.OnClickListener {
         final FirstrunPagerAdapter adapter = new FirstrunPagerAdapter(container.getContext(), this);
 
         viewPager = view.findViewById(R.id.pager);
+        viewPager.setPageMargin((int) getContext().getResources().getDimension(R.dimen.firstrun_margin_between_cards));
         viewPager.setContentDescription(adapter.getPageAccessibilityDescription(0));
         viewPager.setFocusable(true);
 

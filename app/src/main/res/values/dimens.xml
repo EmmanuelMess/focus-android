@@ -21,9 +21,11 @@
     <dimen name="design_navigation_separator_vertical_padding" tools:override="true">0dp</dimen>
     <dimen name="design_navigation_padding_bottom" tools:override="true">0dp</dimen>
 
+    <dimen name="firstrun_margin_between_cards">12dp</dimen>
+
     <dimen name="firstrun_card_width">300dp</dimen>
     <dimen name="firstrun_card_height">460dp</dimen>
-    
+
     <dimen name="fingerprint_icon_size">64dp</dimen>
     <dimen name="fingerprint_status_layout_margin_vertical">48dp</dimen>
 
