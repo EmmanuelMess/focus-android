@@ -14,6 +14,8 @@ import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.style.StyleSpan
 
+data class ClipboardData(val isLink: Boolean, val text: String)
+
 sealed class State {
     data class Disabled(val givePrompt: Boolean) : State()
     data class NoSuggestionsAPI(val givePrompt: Boolean) : State()
@@ -26,6 +28,11 @@ class SearchSuggestionsViewModel(application: Application) : AndroidViewModel(ap
 
     private val _selectedSearchSuggestion = MutableLiveData<String>()
     val selectedSearchSuggestion: LiveData<String> = _selectedSearchSuggestion
+
+    private val _selectedLink = MutableLiveData<String>()
+    val selectedLink: LiveData<String> = _selectedLink
+
+    val clipboardQuery = MutableLiveData<ClipboardData?>()
 
     private val _searchQuery = MutableLiveData<String>()
     val searchQuery: LiveData<String> = _searchQuery
@@ -55,6 +62,10 @@ class SearchSuggestionsViewModel(application: Application) : AndroidViewModel(ap
     fun selectSearchSuggestion(suggestion: String, alwaysSearch: Boolean = false) {
         this.alwaysSearch = alwaysSearch
         _selectedSearchSuggestion.postValue(suggestion)
+    }
+
+    fun selectLink(link: String) {
+        _selectedLink.postValue(link)
     }
 
     fun setSearchQuery(query: String) {

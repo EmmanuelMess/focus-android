@@ -7,24 +7,30 @@ package org.mozilla.focus.utils
 
 import android.app.Activity
 import android.content.Context
+import android.graphics.Typeface
 import android.os.Handler
 import android.os.Looper
 import android.support.annotation.StringRes
 import android.support.design.widget.Snackbar
 import android.support.v4.content.ContextCompat
 import android.support.v4.view.ViewCompat
+import android.text.SpannableString
+import android.text.style.StyleSpan
 import android.view.Gravity
 import android.view.MenuItem
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
 import org.mozilla.focus.R
+import org.mozilla.focus.fragment.UrlInputFragment
 import java.lang.ref.WeakReference
 
 object ViewUtils {
 
     private const val MENU_ITEM_ALPHA_ENABLED = 255
     private const val MENU_ITEM_ALPHA_DISABLED = 130
+
+    private const val PLACEHOLDER = "5981086f-9d45-4f64-be99-7d2ffa03befb"
 
     /**
      * Flag of imeOptions: used to request that the IME does not update any personalized data such
@@ -133,5 +139,21 @@ object ViewUtils {
         if (icon != null) {
             icon.mutate().alpha = if (enabled) MENU_ITEM_ALPHA_ENABLED else MENU_ITEM_ALPHA_DISABLED
         }
+    }
+
+    /**
+     * If [hint] represents "x %s" the function will return "x [boldText]" with [boldText] in bold.
+     *
+     * LTR languages sometimes have grammar where the strings are displayed to the left
+     * of the hint string. To take care of LTR, RTL, and special LTR cases, we use a
+     * placeholder to know the start and end indices of where we should bold the text.
+     */
+    fun showParameterInBold(context: Context, resId: Int, boldText: String): SpannableString {
+        val hint = context.getString(resId, PLACEHOLDER)
+        val start = hint.indexOf(PLACEHOLDER)
+
+        val content = SpannableString(hint.replace(PLACEHOLDER, boldText))
+        content.setSpan(StyleSpan(Typeface.BOLD), start, start + boldText.length, 0)
+        return content
     }
 }

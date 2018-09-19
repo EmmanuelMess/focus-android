@@ -35,6 +35,7 @@ import org.mozilla.focus.session.SessionManager
 import org.mozilla.focus.session.Source
 import org.mozilla.focus.utils.SupportUtils
 import org.mozilla.focus.utils.UrlUtils
+import org.mozilla.focus.utils.ViewUtils.showParameterInBold
 
 class SearchSuggestionsFragment : Fragment() {
     lateinit var searchSuggestionsViewModel: SearchSuggestionsViewModel
@@ -57,6 +58,22 @@ class SearchSuggestionsFragment : Fragment() {
         searchSuggestionsViewModel.searchQuery.observe(this, Observer {
             searchView.text = it
             searchView.contentDescription = context!!.getString(R.string.search_hint, it)
+        })
+
+        searchSuggestionsViewModel.clipboardQuery.observe(this, Observer {
+            if (it != null) {
+                val (isClipboardUrl, text) = it
+
+                val drawableStartResource =
+                        if (isClipboardUrl) R.drawable.ic_link
+                        else R.drawable.ic_search
+
+                clipboardView.setCompoundDrawablesRelativeWithIntrinsicBounds(drawableStartResource, 0, 0, 0)
+                clipboardView.text = showParameterInBold(requireContext(), R.string.search_from_clipboard_message, text)
+                clipboardView.visibility = View.VISIBLE
+            } else {
+                clipboardView.visibility = View.GONE
+            }
         })
 
         searchSuggestionsViewModel.suggestions.observe(this, Observer { suggestions ->
@@ -109,6 +126,16 @@ class SearchSuggestionsFragment : Fragment() {
             val textView = it
             if (textView is TextView) {
                 searchSuggestionsViewModel.selectSearchSuggestion(textView.text.toString(), true)
+            }
+        }
+
+        clipboardView.setOnClickListener {
+            val (isClipboardUrl, text) = searchSuggestionsViewModel.clipboardQuery.value ?: return@setOnClickListener
+
+            if (isClipboardUrl) {
+                searchSuggestionsViewModel.selectLink(text)
+            } else {
+                searchSuggestionsViewModel.selectSearchSuggestion(text, true)
             }
         }
 

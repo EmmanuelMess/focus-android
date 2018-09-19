@@ -8,6 +8,9 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
+import android.content.ClipDescription
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.SharedPreferences
 import android.content.res.Configuration
 import android.graphics.Typeface
@@ -40,6 +43,7 @@ import org.mozilla.focus.R.string.teaser
 import org.mozilla.focus.locale.LocaleAwareAppCompatActivity
 import org.mozilla.focus.locale.LocaleAwareFragment
 import org.mozilla.focus.menu.home.HomeMenu
+import org.mozilla.focus.searchsuggestions.ClipboardData
 import org.mozilla.focus.searchsuggestions.SearchSuggestionsViewModel
 import org.mozilla.focus.searchsuggestions.ui.SearchSuggestionsFragment
 import org.mozilla.focus.session.Session
@@ -184,6 +188,12 @@ class UrlInputFragment :
                 }
             }
         })
+
+        searchSuggestionsViewModel.selectedLink.observe(this, Observer {
+            it ?: return@Observer
+
+            openUrl(it, null)
+        })
     }
 
     override fun onResume() {
@@ -322,7 +332,25 @@ class UrlInputFragment :
             searchViewContainer?.visibility = View.GONE
         }
 
+        refreshClipboardSearchSuggestion()
+
         updateTipsLabel()
+    }
+
+    private fun refreshClipboardSearchSuggestion() {
+        val clipboardManager = context!!.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
+                ?: return
+        if (!clipboardManager.hasPrimaryClip()) return
+
+        val clipboardDescription = clipboardManager.primaryClipDescription
+        if (clipboardDescription != null && !clipboardDescription.hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN)) {
+            return
+        }
+
+        val clipboardText = clipboardManager.primaryClip!!.getItemAt(0)!!.text.toString()
+        val isClipboardUrl = UrlUtils.isUrl(clipboardText)
+
+        searchSuggestionsViewModel.clipboardQuery.value = ClipboardData(isClipboardUrl, clipboardText)
     }
 
     override fun applyLocale() {
@@ -763,6 +791,7 @@ class UrlInputFragment :
             val content = SpannableString(hint.replace(PLACEHOLDER, searchText))
             content.setSpan(StyleSpan(Typeface.BOLD), start, start + searchText.length, 0)
             searchViewContainer?.visibility = View.VISIBLE
+            refreshClipboardSearchSuggestion()
         }
     }
 
